@@ -1,0 +1,17 @@
+# Controlled vocabulary of "what the user is doing / who is involved".
+# The LLM may ONLY pick tags from this list. SOPs target these tags in `applies_to`.
+# Adding a tag here (+ an SOP that uses it) needs no Python change.
+tags:
+  cycling: "Riding a bicycle for exercise, sport, or to get somewhere"
+  two_wheeler: "Riding a motorbike, scooter or moped"
+  running: "Running or jogging outdoors"
+  walking: "Walking, strolling or light outdoor exercise"
+  hiking: "Hiking, trekking or trail walking"
+  outdoor_sports: "Playing a sport outdoors (cricket, football, etc.)"
+  picnic: "A picnic, or eating a meal outdoors"
+  outdoor_leisure: "Casual, low-risk outings only: a park visit, beach stroll, playground, sightseeing. NOT adventure or specialised activities"
+  travel_road: "Travelling or commuting by road: driving, bus, bike or two-wheeler to work"
+  children: "The activity involves a child or children"
+  elderly: "The activity involves an elderly person"
+  pets: "The activity involves a pet (for example walking a dog)"
+  other_activity: "A specialised, adventure or higher-risk outdoor activity with no tag above (scuba diving, climbing, paragliding, skiing, rafting, etc.). No policy covers it on purpose"

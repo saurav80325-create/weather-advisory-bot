@@ -1,0 +1,189 @@
+# Standard Operating Procedures. Pure data: the code never contains advice text.
+# type: rule      -> deterministic `when` condition over weather facts.
+# type: judgment  -> fuzzy; the LLM may only choose one verdict label, and the advice
+#                    text for that label is written here, not by the model.
+# lead: true      -> situational policy that is always listed first, whatever else triggers.
+# Ranking when several trigger: lead first, then severity, then `priority` (lower wins), then id.
+sops:
+  - id: SOP-01
+    title: Heavy-rain regime (situational override)
+    category: general
+    type: rule
+    severity: critical
+    lead: true
+    priority: 1
+    applies_to: [any]
+    when:
+      any:
+        - {field: precip_mm_day, op: ">=", value: 64.5}
+        - all:
+            - {field: weather_code, op: ">=", value: 95}
+            - {field: precip_mm_day, op: ">=", value: 30}
+    headline: "A heavy-rain regime is forecast for the day."
+    advice: "A heavy-rainfall regime is forecast for this location (a daily total at or above the 64.5 mm 'heavy rain' mark, or thunderstorms with 30 mm or more). Treat every outdoor plan today as high risk: postpone non-essential outdoor activity and travel, stay away from waterlogged roads, underpasses and low-lying areas, and check official IMD warnings before going out."
+
+  - id: SOP-02
+    title: Thunderstorm
+    category: general
+    type: rule
+    severity: critical
+    priority: 5
+    applies_to: [any]
+    when: {field: weather_code, op: ">=", value: 95}
+    headline: "Thunderstorms are forecast in this window."
+    advice: "Thunderstorms are forecast in this window. Do not start outdoor activity. If you are already outside, move into a sturdy building or a hard-topped vehicle and keep away from open ground, tall trees and water."
+
+  - id: SOP-03
+    title: Strong wind and riders
+    category: travel
+    type: rule
+    severity: high
+    priority: 10
+    applies_to: [cycling, two_wheeler]
+    when:
+      any:
+        - {field: wind_kmh, op: ">", value: 40}
+        - {field: gust_kmh, op: ">=", value: 60}
+    headline: "Wind is strong enough to be a safety risk for bikes and scooters."
+    advice: "Wind this strong is a safety risk for riders, not just a comfort issue: gusts can push a bicycle or scooter off its line. Do not ride in this window; use another way to travel or postpone."
+
+  - id: SOP-04
+    title: Very high UV and exertion
+    category: outdoor_exercise
+    type: rule
+    severity: high
+    priority: 20
+    applies_to: [running, cycling, outdoor_sports, hiking, walking, outdoor_leisure]
+    when: {field: uv_midday, op: ">=", value: 8}
+    headline: "UV is very high around midday."
+    advice: "UV is very high around midday. Skip strenuous outdoor activity between 11:00 and 16:00 and move it to before 09:00 or after 17:00. If you must be out, cover up, wear a hat and use SPF 30+ sunscreen."
+
+  - id: SOP-05
+    title: Elevated UV
+    category: outdoor_exercise
+    type: rule
+    severity: moderate
+    priority: 30
+    applies_to: [running, cycling, outdoor_sports, hiking, walking, outdoor_leisure, picnic]
+    when:
+      all:
+        - {field: uv_midday, op: ">=", value: 6}
+        - {field: uv_midday, op: "<", value: 8}
+    headline: "UV is elevated around midday."
+    advice: "UV is elevated around midday. Use SPF 30+ sunscreen, a hat and sunglasses, and take breaks in the shade."
+
+  - id: SOP-06
+    title: Extreme heat and exertion
+    category: outdoor_exercise
+    type: rule
+    severity: high
+    priority: 25
+    applies_to: [running, cycling, outdoor_sports, hiking, walking]
+    when: {field: feels_like_c, op: ">=", value: 41}
+    headline: "Feels-like temperature is in the heat-illness range."
+    advice: "A feels-like temperature at or above 41 degrees C carries a real risk of heat illness during exertion. Move strenuous exercise to a cooler hour, carry water, and stop at once if you feel dizzy, nauseous or faint."
+
+  - id: SOP-07
+    title: Likely rain on road journeys
+    category: travel
+    type: rule
+    severity: moderate
+    priority: 30
+    applies_to: [travel_road]
+    when:
+      all:
+        - {field: precip_prob_pct, op: ">=", value: 70}
+        - {field: precip_mm, op: ">=", value: 2.5}
+    headline: "Rain is likely and measurable, so expect road delays."
+    advice: "Rain is likely and measurable in this window. Expect slower traffic and delays, leave extra time, and check local traffic and weather alerts before you leave."
+
+  - id: SOP-08
+    title: Low visibility
+    category: travel
+    type: rule
+    severity: high
+    priority: 12
+    applies_to: [travel_road, cycling, two_wheeler]
+    when: {field: visibility_m, op: "<", value: 1000}
+    headline: "Visibility is under 1 km."
+    advice: "Visibility is under 1 km (fog, haze or heavy rain). Delay non-essential trips. If you must travel, use low-beam lights, reduce speed, and avoid riding bicycles or scooters."
+
+  - id: SOP-09
+    title: Children and heat
+    category: vulnerable_groups
+    type: rule
+    severity: high
+    priority: 15
+    applies_to: [children]
+    when: {field: temp_c, op: ">=", value: 38}
+    headline: "It is hot enough that children can overheat quickly."
+    advice: "Children overheat faster than adults. Keep outdoor play to early morning or evening, stay in shade, give regular water breaks, and bring them indoors if they look flushed, drowsy or unwell."
+
+  - id: SOP-10
+    title: Elderly and heat
+    category: vulnerable_groups
+    type: rule
+    severity: moderate
+    priority: 30
+    applies_to: [elderly]
+    when: {field: feels_like_c, op: ">=", value: 35}
+    headline: "Heat is a risk for older adults."
+    advice: "Older adults are more vulnerable to heat. Prefer outings in the early morning, stay in the shade, carry water, and avoid long exposure."
+
+  - id: SOP-11
+    title: Elderly and cold
+    category: vulnerable_groups
+    type: rule
+    severity: moderate
+    priority: 30
+    applies_to: [elderly]
+    when: {field: temp_min_c, op: "<=", value: 8}
+    headline: "Cold is a risk for older adults."
+    advice: "Cold raises the risk of chills and slips for older adults. Dress in layers, avoid very early or late outings, and go with someone if possible."
+
+  - id: SOP-12
+    title: Pets and heat
+    category: vulnerable_groups
+    type: rule
+    severity: moderate
+    priority: 30
+    applies_to: [pets]
+    when: {field: temp_c, op: ">=", value: 35}
+    headline: "Heat and hot pavement can hurt pets."
+    advice: "Hot air and hot pavement can injure pets. Walk at cooler times, test the ground with the back of your hand, bring water, and never leave a pet in a parked vehicle."
+
+  - id: SOP-13
+    title: Picnic and relaxed outing suitability (fuzzy)
+    category: leisure
+    type: judgment
+    priority: 35
+    applies_to: [picnic, outdoor_leisure]
+    judge_fields: [temp_c, feels_like_c, wind_kmh, precip_prob_pct, precip_mm, uv_midday, humidity_pct]
+    rubric: "Judge overall pleasantness and practicality for relaxing outdoors with food: comfortable temperature, little or no rain, a light breeze, no storm risk. Weigh the factors together; no single number decides. good = clearly pleasant; mixed = workable with some compromise; poor = likely to be unpleasant or impractical."
+    verdicts:
+      good:
+        severity: info
+        headline: "Conditions look pleasant for a relaxed outing."
+        advice: "Conditions look pleasant for an outdoor meal or outing. Pack water and enjoy it."
+      mixed:
+        severity: low
+        headline: "Conditions are workable but not ideal for a relaxed outing."
+        advice: "Conditions are workable but not ideal. Pick a shaded spot, carry water and a rain cover, and keep a plan B indoors."
+      poor:
+        severity: moderate
+        headline: "Conditions look unpleasant or impractical for a relaxed outing."
+        advice: "Conditions look unpleasant or impractical for an outdoor meal. Consider moving it indoors or to another day."
+
+  - id: SOP-14
+    title: Chance of a shower
+    category: outdoor_exercise
+    type: rule
+    severity: low
+    priority: 40
+    applies_to: [picnic, outdoor_leisure, walking, running, cycling, outdoor_sports]
+    when:
+      all:
+        - {field: precip_prob_pct, op: ">=", value: 40}
+        - {field: precip_prob_pct, op: "<", value: 70}
+    headline: "A shower is possible."
+    advice: "A shower is possible in this window. Carry rain cover and have an indoor fallback."
