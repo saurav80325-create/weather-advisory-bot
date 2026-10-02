@@ -7,7 +7,7 @@ The model never decides what good advice is: it extracts intent, picks a label f
 ```bash
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                                   # add ONE API key (.env is git-ignored)
+copy .env.example .env                                   # add ONE API key (.env is git-ignored)
 streamlit run app.py                                   # frontend + backend (the graph runs in-process)
 python -m evals.run_evals                              # eval suite (needs the API key); add case ids to run a subset, e.g. ... E1 S2
 ```
@@ -55,6 +55,7 @@ flowchart TD
 - **Prompt injection**: the raw user text reaches only `understand`, which can only output a schema whose tags are filtered against the taxonomy. `judge` and `compose` never see the raw message. Policy IDs and the citation footer come from code, and `verify` rejects any number not in the API facts or SOP text, and any SOP ID not selected. Defence in depth, not a single prompt.
 - **Session memory**: LangGraph `MemorySaver` checkpointer, one `thread_id` per browser session = raw message history (`messages`) **plus** a structured `context` (location, tags, time frame, last SOP ids). Follow-up resolution (carry location/tags) is done in code, not left to the model. Consistency holds because every answer is re-derived from the same policies with a fresh forecast for the requested window. The bot does not currently say "this changed since earlier".
 - **Missing data**: a condition on a missing field is False (never guessed). Geocoder or weather failure, empty geocode result, or a window that already passed all route to `fail_honestly`.
+- **"Today" window**: "today" means the remaining hours of the local day, not the full day. Late at night the window can be a single hour, so rain earlier that day will not appear. A window that has fully passed routes to `fail_honestly`. Finer windows (this_evening, tomorrow_morning, ...) are defined in `weather.yaml`.
 
 ## The "add an 11th SOP live" test
 - New rule on existing fields/tags: append to `sops.yaml`. Saved file is picked up on the next message (hot reload; bad edits are rejected and the last good set keeps serving). **No Python touched.**
@@ -68,7 +69,7 @@ Cases: E1-E2 clear SOP; P1-P2 paraphrase; F1-F2 fuzzy; S1 live severe; S2 pinned
 
 ### Results 
 
-Run on 2 Oct 2026 with `google_genai:gemini-3.5-flash-lite` (this model ignores `temperature=0`, so outputs can vary between runs). Full suite: **17 PASS, 0 FAIL, 1 INCONCLUSIVE**.
+Run on 3 Oct 2026 with `google_genai:gemini-3.5-flash-lite` (this model ignores `temperature=0`, so outputs can vary between runs). Full suite: **17 PASS, 0 FAIL, 1 INCONCLUSIVE**.
 
 | Case | What it checks | Status |
 |---|---|---|
