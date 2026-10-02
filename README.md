@@ -11,7 +11,7 @@ cp .env.example .env                                   # add ONE API key (.env i
 streamlit run app.py                                   # frontend + backend (the graph runs in-process)
 python -m evals.run_evals                              # eval suite (needs the API key); add case ids to run a subset, e.g. ... E1 S2
 ```
-Model: `LLM_MODEL` env var, `provider:model` (default `anthropic:claude-haiku-4-5-20251001`; e.g. `openai:gpt-4o-mini`).
+Model: `LLM_MODEL` env var, `provider:model`. The eval results below were produced with `google_genai:gemini-3.5-flash-lite` (set `GOOGLE_API_KEY`); other providers (default `anthropic:claude-haiku-4-5-20251001`, or `openai:gpt-4o-mini`) are supported by the code but I have not run the evals on them.
 
 ## Architecture
 ```mermaid

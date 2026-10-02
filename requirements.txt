@@ -8,3 +8,4 @@ pyyaml
 requests
 python-dotenv
 streamlit
+langchain-google-genai
